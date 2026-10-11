@@ -33,6 +33,27 @@ Boot the VM, install Ubuntu Desktop 24.04 LTS, open a terminal in the VM, then r
 
 Reboot once. Done.
 
+## Fully unattended (optional)
+
+Skip the manual install entirely with an autoinstall seed. Secrets stay local — the seed VHD is
+built on your machine and never committed:
+
+    # elevated PowerShell on the Hyper-V host:
+    .\make-seed.ps1 -SshPubKey "$env:USERPROFILE\.ssh\id_ed25519.pub" `
+      -NvidiaKey "nvapi-..." -DeepinfraKey "..." `
+      -NextcloudUrl "https://cloud.cryptocomputer.ca" -NextcloudUser botbox -NextcloudPass "<app-password>"
+
+    .\create-vm.ps1 -IsoPath "C:\ISO\ubuntu-24.04.5.1-desktop-amd64.iso" -SeedVhdx "C:\HyperV\BOTBOX-seed.vhdx"
+    Start-VM -Name BOTBOX
+
+- Ubuntu installs itself (~15-30 min), reboots, and cloud-init pulls the bootstrap from this repo
+  on first boot — the VM lands fully provisioned with zero interaction.
+- `make-seed.ps1` prints a one-time console password (fallback only; SSH key + desktop auto-login
+  are configured).
+- The seed VHD contains your keys — delete it after installation (`Remove-Item C:\HyperV\BOTBOX-seed.vhdx`).
+- If the installer ever opens interactively (seed not detected), that's fine: install manually and
+  use the curl one-liner above instead.
+
 ## Wiring it into the hub ecosystem
 
 1. opencode web UI (host): add `http://<vm-ip>:4096` as a second server — VM sessions are fully chat-capable there.

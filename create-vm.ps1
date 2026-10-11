@@ -9,7 +9,8 @@ param(
   [int]$MemoryGB = 8,
   [int]$DiskGB = 80,
   [string]$SwitchName = "Default Switch",
-  [string]$VmDir = "C:\HyperV\$Name"
+  [string]$VmDir = "C:\HyperV\$Name",
+  [string]$SeedVhdx = ""
 )
 
 if (-not (Test-Path $IsoPath)) { throw "ISO not found: $IsoPath" }
@@ -26,10 +27,23 @@ Add-VMDvdDrive -VMName $Name -Path $IsoPath
 Set-VMFirmware -VMName $Name -EnableSecureBoot On -SecureBootTemplate "MicrosoftUEFICertificateAuthority" -FirstBootDevice (Get-VMDvdDrive -VMName $Name)
 Get-VMIntegrationService -VMName $Name | Enable-VMIntegrationService -ErrorAction SilentlyContinue | Out-Null
 
+if ($SeedVhdx) {
+  if (-not (Test-Path $SeedVhdx)) { throw "Seed VHD not found: $SeedVhdx (build it with make-seed.ps1)" }
+  Add-VMHardDiskDrive -VMName $Name -Path $SeedVhdx
+}
+
 Write-Host "VM '$Name' created." -ForegroundColor Green
-Write-Host "Next:"
-Write-Host "  1. Start-VM -Name $Name ; connect with vmconnect.exe `"$Name`""
-Write-Host "  2. Install Ubuntu Desktop 24.04 LTS (user: pick a name you like, e.g. 'botbox'; passwordless sudo is configured by bootstrap)"
-Write-Host "  3. In the VM terminal run the BOTBOX bootstrap (see botbox/README.md), then reboot once"
+if ($SeedVhdx) {
+  Write-Host "Seed attached — installation will be UNATTENDED:" -ForegroundColor Green
+  Write-Host "  Start-VM -Name $Name   (open vmconnect to watch, but no input needed)"
+  Write-Host "  Ubuntu autoinstalls (~15-30 min), reboots, then cloud-init runs the BOTBOX bootstrap on first boot."
+  Write-Host "  After provisioning: http://botbox.local:4096 (basic-auth password is in ~/.config/opencode/env on the VM)."
+  Write-Host "  When done, delete the local seed VHD (it contains your keys): Remove-Item `"$SeedVhdx`""
+} else {
+  Write-Host "Next:"
+  Write-Host "  1. Start-VM -Name $Name ; connect with vmconnect.exe `"$Name`""
+  Write-Host "  2. Install Ubuntu Desktop 24.04 LTS (user: pick a name you like, e.g. 'botbox'; passwordless sudo is configured by bootstrap)"
+  Write-Host "  3. In the VM terminal run the BOTBOX bootstrap (see botbox/README.md), then reboot once"
+}
 Write-Host "Optional snapshot before first boot:"
 Write-Host "  Checkpoint-VM -Name $Name -SnapshotName 'fresh-install'"
