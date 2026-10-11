@@ -39,17 +39,19 @@ Skip the manual install entirely with an autoinstall seed. Secrets stay local �
 built on your machine and never committed:
 
     # elevated PowerShell on the Hyper-V host:
-    .\make-seed.ps1 -SshPubKey "$env:USERPROFILE\.ssh\id_ed25519.pub" `
-      -NvidiaKey "nvapi-..." -DeepinfraKey "..." `
-      -NextcloudUrl "https://cloud.cryptocomputer.ca" -NextcloudUser botbox -NextcloudPass "<app-password>"
+    copy seed-values.example.ps1 seed-values.ps1
+    notepad seed-values.ps1        # fill every FILL_ME (or leave optional fields empty to skip)
+    .\make-seed.ps1               # reads seed-values.ps1; validates; prints one-time console password
 
     .\create-vm.ps1 -IsoPath "C:\ISO\ubuntu-24.04.5.1-desktop-amd64.iso" -SeedVhdx "C:\HyperV\BOTBOX-seed.vhdx"
     Start-VM -Name BOTBOX
 
 - Ubuntu installs itself (~15-30 min), reboots, and cloud-init pulls the bootstrap from this repo
   on first boot — the VM lands fully provisioned with zero interaction.
-- `make-seed.ps1` prints a one-time console password (fallback only; SSH key + desktop auto-login
-  are configured).
+- `seed-values.ps1` is git-ignored: your keys never leave the machine. `make-seed.ps1` refuses to
+  run if any field still says `FILL_ME`, and tells you exactly which one.
+- The Nextcloud section explains where the app password comes from (botbox user → Security →
+  Devices & sessions → Create new app password). Leave all three Nextcloud fields empty to skip.
 - The seed VHD contains your keys — delete it after installation (`Remove-Item C:\HyperV\BOTBOX-seed.vhdx`).
 - If the installer ever opens interactively (seed not detected), that's fine: install manually and
   use the curl one-liner above instead.
