@@ -31,6 +31,9 @@ $OpenscaleKey = ""
 #   2. Log in AS botbox:       avatar -> Personal settings -> Security
 #                              -> Devices & sessions -> "Create new app password"
 #   3. Paste THAT app password below (NOT a login password)
+# Prefer not saving it to disk? Leave all three empty here and pass at seed time:
+#   .\make-seed.ps1 -NextcloudUrl "https://cloud.cryptocomputer.ca" `
+#                   -NextcloudUser botbox -NextcloudPass "<paste from password manager>"
 $NextcloudUrl = "https://cloud.cryptocomputer.ca"   # your Nextcloud, public or local
 $NextcloudUser = "botbox"
 $NextcloudPass = "FILL_ME"                          # the app password, e.g. "AbC123-xYz789-..."
