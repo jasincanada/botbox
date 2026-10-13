@@ -1,0 +1,1 @@
+mkdir -p ~/.ssh && chmod 700 ~/.ssh && printf '%s\n' 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHP/1dDhzBInRsXOnn1yJ2AsnREDeHCdZtpBKATP+2aK botbox-control-5900X' >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys && echo OK_ADDED
